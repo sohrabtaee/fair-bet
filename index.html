@@ -36,7 +36,12 @@
       .person-row {
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .person-row label {
+        margin-top: 0;
       }
 
       input,
@@ -101,10 +106,12 @@
 
         .person-row {
           flex-direction: row;
+          gap: 14px;
         }
 
         .person-row > div {
           flex: 1;
+          min-width: 0;
         }
       }
     </style>
