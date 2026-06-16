@@ -34,6 +34,12 @@
         font-weight: 600;
       }
 
+      .person-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
       input,
       textarea {
         width: 100%;
@@ -88,6 +94,13 @@
       strong {
         color: inherit;
       }
+
+      @media (max-width: 600px) {
+        .person-row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
     </style>
   </head>
 
@@ -99,23 +112,41 @@
         <label for="description">What's the bet?</label>
         <textarea id="description"></textarea>
 
-        <label for="personOneProbability"
-          >Person one's probability that it happens (%)</label
-        >
-        <input
-          id="personOneProbability"
-          type="number"
-          placeholder="Example: 60"
-        />
+        <div class="person-row">
+          <div>
+            <label for="personOneName">Person one's name</label>
+            <input id="personOneName" type="text" placeholder="Example: Alex" />
+          </div>
 
-        <label for="personTwoProbability"
-          >Person two's probability that it happens (%)</label
-        >
-        <input
-          id="personTwoProbability"
-          type="number"
-          placeholder="Example: 20"
-        />
+          <div>
+            <label for="personOneProbability"
+              >Person one's probability (%)</label
+            >
+            <input
+              id="personOneProbability"
+              type="number"
+              placeholder="Example: 60"
+            />
+          </div>
+        </div>
+
+        <div class="person-row">
+          <div>
+            <label for="personTwoName">Person two's name</label>
+            <input id="personTwoName" type="text" placeholder="Example: Sam" />
+          </div>
+
+          <div>
+            <label for="personTwoProbability"
+              >Person two's probability (%)</label
+            >
+            <input
+              id="personTwoProbability"
+              type="number"
+              placeholder="Example: 20"
+            />
+          </div>
+        </div>
 
         <label for="amount">Total bet amount</label>
         <input id="amount" type="number" placeholder="Example: 100" />
@@ -171,13 +202,26 @@
       }
 
       function formatMoney(value) {
-        return `$${value.toFixed(2)}`
+        return `€${value.toFixed(2)}`
+      }
+
+      function escapeHtml(value) {
+        return value
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;')
       }
 
       function submitBet(event) {
         event.preventDefault()
 
         const description = document.getElementById('description').value.trim()
+        const personOneName =
+          document.getElementById('personOneName').value.trim() || 'Person one'
+        const personTwoName =
+          document.getElementById('personTwoName').value.trim() || 'Person two'
         const probabilityA = Number(
           document.getElementById('personOneProbability').value,
         )
@@ -214,20 +258,20 @@
 
           resultEl.className = 'result success'
           resultEl.innerHTML = `
-          <strong>Bet:</strong> ${description}<br><br>
+          <strong>Bet:</strong> ${escapeHtml(description)}<br><br>
 
-          <strong>Person one should put in:</strong> ${formatMoney(result.stakeA)}<br>
-          <strong>Person two should put in:</strong> ${formatMoney(result.stakeB)}<br><br>
+          <strong>${escapeHtml(personOneName)} should put in:</strong> ${formatMoney(result.stakeA)}<br>
+          <strong>${escapeHtml(personTwoName)} should put in:</strong> ${formatMoney(result.stakeB)}<br><br>
 
-          <strong>If person one is right</strong> and ${personOneWinsIf},
+          <strong>If ${escapeHtml(personOneName)} is right</strong> and ${personOneWinsIf},
           they win ${formatMoney(result.stakeB)}.<br>
 
-          <strong>If person two is right</strong> and ${personTwoWinsIf},
+          <strong>If ${escapeHtml(personTwoName)} is right</strong> and ${personTwoWinsIf},
           they win ${formatMoney(result.stakeA)}.<br><br>
 
           <strong>Normalized split:</strong>
-          Person one ${(result.normalizedA * 100).toFixed(2)}% /
-          Person two ${(result.normalizedB * 100).toFixed(2)}%
+          ${escapeHtml(personOneName)} ${(result.normalizedA * 100).toFixed(2)}% /
+          ${escapeHtml(personTwoName)} ${(result.normalizedB * 100).toFixed(2)}%
         `
         } catch (error) {
           resultEl.className = 'result error'
