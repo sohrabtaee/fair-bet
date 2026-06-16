@@ -77,6 +77,13 @@
         background: #000;
       }
 
+      .share-button {
+        display: block;
+        margin-top: 16px;
+        width: auto;
+        padding: 12px 16px;
+      }
+
       .result {
         margin-top: 24px;
         padding: 16px;
@@ -236,6 +243,16 @@
         })
       }
 
+      async function shareResult(resultText) {
+        if (!navigator.share) {
+          throw new Error('Sharing is not supported on this device.')
+        }
+
+        await navigator.share({
+          text: resultText,
+        })
+      }
+
       function submitBet(event) {
         event.preventDefault()
 
@@ -278,6 +295,18 @@
               ? 'the event happens'
               : 'the event does not happen'
 
+          const resultText = [
+            `Bet: ${description}`,
+            '',
+            `${personOneName} should put in: ${formatMoney(result.stakeA)}`,
+            `${personTwoName} should put in: ${formatMoney(result.stakeB)}`,
+            '',
+            `If ${personOneName} is right and ${personOneWinsIf}, they win ${formatMoney(result.stakeB)}.`,
+            `If ${personTwoName} is right and ${personTwoWinsIf}, they win ${formatMoney(result.stakeA)}.`,
+            '',
+            `Normalized split: ${personOneName} ${(result.normalizedA * 100).toFixed(2)}% / ${personTwoName} ${(result.normalizedB * 100).toFixed(2)}%`,
+          ].join('\n')
+
           resultEl.className = 'result success'
           resultEl.innerHTML = `
           <strong>Bet:</strong> ${escapeHtml(description)}<br><br>
@@ -294,7 +323,21 @@
           <strong>Normalized split:</strong>
           ${escapeHtml(personOneName)} ${(result.normalizedA * 100).toFixed(2)}% /
           ${escapeHtml(personTwoName)} ${(result.normalizedB * 100).toFixed(2)}%
+
+          <button class="share-button" type="button">Share calculation</button>
         `
+
+          resultEl
+            .querySelector('.share-button')
+            .addEventListener('click', async () => {
+              try {
+                await shareResult(resultText)
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  window.alert(error.message)
+                }
+              }
+            })
         } catch (error) {
           resultEl.className = 'result error'
           resultEl.textContent = error.message
