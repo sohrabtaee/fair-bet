@@ -227,6 +227,15 @@
           .replaceAll("'", '&#039;')
       }
 
+      function scrollToBottom() {
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          })
+        })
+      }
+
       function submitBet(event) {
         event.preventDefault()
 
@@ -290,6 +299,8 @@
           resultEl.className = 'result error'
           resultEl.textContent = error.message
         }
+
+        scrollToBottom()
       }
 
       document.getElementById('betForm').addEventListener('submit', submitBet)
