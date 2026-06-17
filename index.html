@@ -135,7 +135,7 @@
         <div class="person-row">
           <div>
             <label for="personOneName">Person one's name</label>
-            <input id="personOneName" type="text" placeholder="Example: Alex" />
+            <input id="personOneName" type="text" placeholder="Example: Ava" />
           </div>
 
           <div>
@@ -153,7 +153,7 @@
         <div class="person-row">
           <div>
             <label for="personTwoName">Person two's name</label>
-            <input id="personTwoName" type="text" placeholder="Example: Sam" />
+            <input id="personTwoName" type="text" placeholder="Example: Rob" />
           </div>
 
           <div>
@@ -170,6 +170,9 @@
 
         <label for="amount">Total bet amount</label>
         <input id="amount" type="number" placeholder="Example: 100" />
+
+        <label for="settlementDate">Settlement date</label>
+        <input id="settlementDate" type="date" required />
 
         <button type="submit">Calculate</button>
       </form>
@@ -225,6 +228,23 @@
         return `€${value.toFixed(2)}`
       }
 
+      function formatDate(value) {
+        return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      }
+
+      function getTodayDateValue() {
+        const today = new Date()
+        const timezoneOffset = today.getTimezoneOffset() * 60000
+
+        return new Date(today.getTime() - timezoneOffset)
+          .toISOString()
+          .slice(0, 10)
+      }
+
       function escapeHtml(value) {
         return value
           .replaceAll('&', '&amp;')
@@ -257,6 +277,7 @@
         event.preventDefault()
 
         const description = document.getElementById('description').value.trim()
+        const settlementDate = document.getElementById('settlementDate').value
         const personOneName =
           document.getElementById('personOneName').value.trim() || 'Person one'
         const personTwoName =
@@ -273,6 +294,14 @@
         try {
           if (!description) {
             throw new Error('Please enter a bet description.')
+          }
+
+          if (!settlementDate) {
+            throw new Error('Please enter a settlement date.')
+          }
+
+          if (settlementDate < getTodayDateValue()) {
+            throw new Error('Settlement date cannot be in the past.')
           }
 
           if (
@@ -301,6 +330,8 @@
             `${personOneName} should put in: ${formatMoney(result.stakeA)}`,
             `${personTwoName} should put in: ${formatMoney(result.stakeB)}`,
             '',
+            `Settlement date: ${formatDate(settlementDate)}`,
+            '',
             `If ${personOneName} is right and ${personOneWinsIf}, they win ${formatMoney(result.stakeB)}.`,
             `If ${personTwoName} is right and ${personTwoWinsIf}, they win ${formatMoney(result.stakeA)}.`,
             '',
@@ -313,6 +344,7 @@
 
           <strong>${escapeHtml(personOneName)} should put in:</strong> ${formatMoney(result.stakeA)}<br>
           <strong>${escapeHtml(personTwoName)} should put in:</strong> ${formatMoney(result.stakeB)}<br><br>
+          <strong>Settlement date:</strong> ${escapeHtml(formatDate(settlementDate))}<br><br>
 
           <strong>If ${escapeHtml(personOneName)} is right</strong> and ${personOneWinsIf},
           they win ${formatMoney(result.stakeB)}.<br>
@@ -347,6 +379,7 @@
       }
 
       document.getElementById('betForm').addEventListener('submit', submitBet)
+      document.getElementById('settlementDate').min = getTodayDateValue()
     </script>
   </body>
 </html>
