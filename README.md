@@ -1,15 +1,39 @@
-# Bet Calculator
+# Fair Bet Calculator
 
-A simple calculator for determining how much each person should contribute to a bet based on their confidence in the outcome.
+A single-page calculator for splitting a bet fairly based on each person's confidence in the outcome.
 
-## The Idea
+Every bet must include a settlement date, because a prediction without a deadline cannot be resolved.
+
+## What It Does
+
+The app asks for:
+
+- A bet description
+- Each person's name
+- Each person's probability estimate
+- The total bet amount
+- A settlement date
+
+It then calculates:
+
+- How much each person should contribute
+- Who wins if the event happens or does not happen
+- The normalized confidence split
+
+The result box also includes a `Share calculation` button that uses the device/browser native share sheet when supported.
+
+## Core Idea
 
 Two people disagree about whether an event will happen.
 
-Examples:
+Example:
 
-- Person 1: 60% chance it happens
-- Person 2: 20% chance it happens
+```text
+Ava: 60% chance it happens
+Rob: 20% chance it happens
+Total bet: €100
+Settlement date: June 30, 2026
+```
 
 One person must be above 50% and the other below 50%.
 
@@ -25,17 +49,16 @@ Given:
 
 - Person 1 probability: `p1`
 - Person 2 probability: `p2`
+- Total bet amount: `totalBet`
 
-We normalize the probabilities so they add up to 100%.
-
-### Formula
+The probabilities are normalized so they add up to 100%.
 
 ```text
 normalizedP1 = p1 / (p1 + p2)
 normalizedP2 = p2 / (p1 + p2)
 ```
 
-The total bet amount is then split according to these normalized values.
+The total bet amount is split according to those normalized values.
 
 ```text
 stakeP1 = totalBet × normalizedP1
@@ -47,9 +70,10 @@ stakeP2 = totalBet × normalizedP2
 Input:
 
 ```text
-Person 1: 60%
-Person 2: 20%
-Total Bet: $100
+Ava: 60%
+Rob: 20%
+Total bet: €100
+Settlement date: June 30, 2026
 ```
 
 Normalization:
@@ -62,93 +86,54 @@ Normalization:
 Result:
 
 ```text
-Person 1 contributes $75
-Person 2 contributes $25
+Ava should put in: €75.00
+Rob should put in: €25.00
 ```
-
-### Outcomes
 
 If the event happens:
 
 ```text
-Person 1 wins
-Profit: $25
+Ava is right and wins Rob's €25.00.
 ```
 
 If the event does not happen:
 
 ```text
-Person 2 wins
-Profit: $75
+Rob is right and wins Ava's €75.00.
 ```
-
-## Why This Approach?
-
-This calculator treats the submitted percentages as measures of confidence.
-
-A person who claims:
-
-```text
-90%
-```
-
-is considered more confident than someone claiming:
-
-```text
-60%
-```
-
-Therefore they:
-
-- Risk more money
-- Receive a smaller reward if correct
-- Suffer a larger loss if wrong
-
-This mirrors the intuition that stronger confidence should come with greater accountability.
 
 ## Validation Rules
 
 The calculator rejects bets where:
 
-### Both people believe the event is likely
-
-```text
-60% vs 70%
-```
-
-### Both people believe the event is unlikely
-
-```text
-20% vs 40%
-```
-
-### Either probability is exactly 50%
-
-```text
-50% vs 20%
-```
-
-### Probabilities are outside the range
-
-```text
-0%
-100%
-negative values
-```
+- The bet description is empty
+- The settlement date is empty
+- The settlement date is in the past
+- The total bet amount is `0`, negative, or missing
+- Either probability is `0`, `100`, negative, or missing
+- Either probability is exactly `50`
+- Both people are above `50%`
+- Both people are below `50%`
 
 The calculator is designed only for situations where the two participants are taking opposite sides of the same prediction.
+
+## Sharing
+
+After calculation, the result can be shared with the `Share calculation` button.
+
+This uses the browser's native Web Share API. It works only in browsers/devices that expose `navigator.share`.
 
 ## Notes
 
 This system intentionally focuses on relative confidence.
 
-Examples:
+These inputs:
 
 ```text
 60% vs 20%
 ```
 
-and
+and:
 
 ```text
 90% vs 30%
