@@ -172,7 +172,7 @@
         <input id="amount" type="number" placeholder="Example: 100" />
 
         <label for="settlementDate">Settlement date</label>
-        <input id="settlementDate" type="date" required />
+        <input id="settlementDate" type="date" />
 
         <button type="submit">Calculate</button>
       </form>
@@ -277,7 +277,6 @@
         event.preventDefault()
 
         const description = document.getElementById('description').value.trim()
-        const settlementDate = document.getElementById('settlementDate').value
         const personOneName =
           document.getElementById('personOneName').value.trim() || 'Person one'
         const personTwoName =
@@ -289,19 +288,12 @@
           document.getElementById('personTwoProbability').value,
         )
         const amount = Number(document.getElementById('amount').value)
+        const settlementDate = document.getElementById('settlementDate').value
         const resultEl = document.getElementById('result')
 
         try {
           if (!description) {
             throw new Error('Please enter a bet description.')
-          }
-
-          if (!settlementDate) {
-            throw new Error('Please enter a settlement date.')
-          }
-
-          if (settlementDate < getTodayDateValue()) {
-            throw new Error('Settlement date cannot be in the past.')
           }
 
           if (
@@ -310,6 +302,14 @@
             Number.isNaN(amount)
           ) {
             throw new Error('Please fill in all numeric fields.')
+          }
+
+          if (!settlementDate) {
+            throw new Error('Please enter a settlement date.')
+          }
+
+          if (settlementDate < getTodayDateValue()) {
+            throw new Error('Settlement date cannot be in the past.')
           }
 
           const result = calculateBet(probabilityA, probabilityB, amount)
